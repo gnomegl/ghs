@@ -1,0 +1,62 @@
+.TH GHS 1  "ghs 0.0.0" 
+.SH NAME
+ghs \- search github repositories
+.SH SYNOPSIS
+\fBghs\fR [OPTIONS] [TERM]
+.SH OPTIONS
+.TP
+\fB\-l\fR, \fB\-\-limit\fR=\fILIMIT\fR
+.br
+"number of results to display" [int] @default "10"
+.TP
+\fB\-e\fR, \fB\-\-email\fR=\fIEMAIL\fR
+.br
+"search by contributor email address (supports * wildcard)" [string]
+.TP
+\fB\-a\fR, \fB\-\-author\fR=\fIAUTHOR\fR
+.br
+"search by commit author name" [string]
+.TP
+\fB\-o\fR, \fB\-\-org\fR=\fIORG\fR
+.br
+"search in specific organization" [string]
+.TP
+\fB\-u\fR, \fB\-\-user\fR=\fIUSER\fR
+.br
+"search in repositories owned by user" [string]
+.TP
+\fB\-s\fR, \fB\-\-sort\fR=\fISORT\fR
+.br
+"sort by (stars, forks, updated)" [string] @default "stars"
+.TP
+\fB\-j\fR, \fB\-\-json\fR
+.br
+"output raw JSON instead of formatted results"
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+.br
+"suppress colored output"
+.TP
+\fB\-d\fR, \fB\-\-deep\fR
+.br
+"perform deeper analysis on found repos" [flag]
+.TP
+\fB\-f\fR, \fB\-\-fork\fR
+.br
+"include forked repositories" [flag]
+.TP
+\fB\-c\fR, \fB\-\-contributors\fR
+.br
+"enumerate all contributors across repositories (requires \-\-org or \-\-user)"
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+.br
+Print help
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+.br
+Print version
+.TP
+[\fITERM\fR]
+.br
+"search term" [string]

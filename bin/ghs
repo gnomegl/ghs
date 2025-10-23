@@ -42,7 +42,7 @@ _argc_usage() {
     cat <<-'EOF'
 search github repositories
 
-USAGE: gh-search [OPTIONS] [TERM]
+USAGE: ghs [OPTIONS] [TERM]
 
 ARGS:
   [TERM]  "search term" [string]
@@ -66,7 +66,7 @@ EOF
 }
 
 _argc_version() {
-    echo gh-search 0.0.0
+    echo ghs 0.0.0
     exit
 }
 
