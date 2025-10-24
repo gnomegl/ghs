@@ -1,4 +1,4 @@
-# gh-search
+# ghs
 
 [![basher install](https://www.basher.it/assets/logo/basher_install.svg)](https://www.basher.it/package/)
 
@@ -7,13 +7,13 @@ github repository search with contributor enumeration
 ## install
 
 ```bash
-basher install gnomegl/gh-search
+basher install gnomegl/ghs
 ```
 
 ## usage
 
 ```bash
-gh-search [term]
+ghs [term]
 ```
 
 search repos by keyword, email, author, org, or user. enumerate contributors with `-c`.
