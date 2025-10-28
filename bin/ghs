@@ -780,7 +780,60 @@ if echo "$response" | jq -e '.message' >/dev/null 2>&1; then
 fi
 
 if [ "$argc_json" = 1 ]; then
-  echo "$response" | jq
+  # If deep analysis requested with JSON output, enrich the JSON
+  if [ "$argc_deep" = 1 ]; then
+    temp_response=$(mktemp)
+    temp_contributors=$(mktemp)
+    temp_commits=$(mktemp)
+    temp_contents=$(mktemp)
+    trap 'rm -f "$temp_response" "$temp_contributors" "$temp_commits" "$temp_contents"' EXIT TERM INT
+    
+    echo "$response" > "$temp_response"
+    
+    echo "$response" | jq -r '.items[] | "\(.full_name)"' | while read -r repo; do
+      printf "${bold}${cyan}Analyzing ${repo}...${reset}\n" >&2
+      
+      # Get contributors
+      if [ -n "$auth_header" ]; then
+        curl -s -H "$auth_header" "https://api.github.com/repos/${repo}/contributors?per_page=10" > "$temp_contributors"
+      else
+        curl -s "https://api.github.com/repos/${repo}/contributors?per_page=10" > "$temp_contributors"
+      fi
+      
+      # Get commits
+      if [ -n "$auth_header" ]; then
+        curl -s -H "$auth_header" "https://api.github.com/repos/${repo}/commits?per_page=100" > "$temp_commits"
+      else
+        curl -s "https://api.github.com/repos/${repo}/commits?per_page=100" > "$temp_commits"
+      fi
+      
+      # Get repository contents
+      if [ -n "$auth_header" ]; then
+        curl -s -H "$auth_header" "https://api.github.com/repos/${repo}/git/trees/HEAD?recursive=1" > "$temp_contents"
+      else
+        curl -s "https://api.github.com/repos/${repo}/git/trees/HEAD?recursive=1" > "$temp_contents"
+      fi
+      
+      # Build deep analysis using file inputs instead of arguments
+      jq --arg repo "$repo" \
+        --slurpfile contributors "$temp_contributors" \
+        --slurpfile commits "$temp_commits" \
+        --slurpfile contents "$temp_contents" \
+        '.items[] | select(.full_name == $repo) | . + {
+          deep_analysis: {
+            top_contributors: ($contributors[0] | if type == "array" then map({login: .login, contributions: .contributions}) else [] end),
+            recent_commit_count: ($commits[0] | if type == "array" then length else 0 end),
+            commit_authors: ($commits[0] | if type == "array" then [.[] | {name: .commit.author.name, email: .commit.author.email}] | unique | .[0:5] else [] end),
+            interesting_files: ($contents[0].tree // [] | map(select(.type=="blob") | .path) | map(select(test("\\.conf$|\\.env|\\.key$|config\\.|\\.yml$|\\.yaml$|\\.json$|\\.xml$|\\.pem$|\\.crt$|\\.cer$"))) | map(select(test("node_modules|vendor") | not)) | .[0:10])
+          }
+        }' "$temp_response"
+    done | jq -s '{total_count: (. | length), items: .}'
+    
+    rm -f "$temp_response" "$temp_contributors" "$temp_commits" "$temp_contents"
+    trap - EXIT TERM INT
+  else
+    echo "$response" | jq
+  fi
 else
   total_count=$(echo "$response" | jq -r '.total_count')
   printf "${bold}Found ${yellow}%s${reset} matching repositories${reset}\n\n" "$total_count"
